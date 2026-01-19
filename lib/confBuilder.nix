@@ -9,17 +9,28 @@
 let
 
   /**
-    Gather hosts and modules into a single system's configuration
+    Pick the right elements from a module
   */
-  prepareModules = {
-
-  };
+  prepareModule =
+    host: module:
+    if (builtins.has module.targets host.name) then
+      (
+        module.sharedConfiguration
+        // (if utils.isDarwin host then module.darwinConfiguration else module.nixosConfiguration)
+      )
+    else
+      { };
 
   /**
     Gather hosts and modules into a single system's configuration
   */
+  prepareModules = host: modules: builtins.map (prepareModule host) modules;
+
+  /**
+    Gather hosts and loaded modules into a single system's configuration
+  */
   prepareSystem =
-    { host }:
+    { host, modules }:
     {
       name =
         assert lib.assertMsg (builtins.hasAttr "name" host)
@@ -27,7 +38,7 @@ let
         host.name;
 
       value = inputs.nix-darwin.lib.darwinSystem {
-        modules = prepareModules;
+        modules = prepareModules host modules;
       };
     };
 
