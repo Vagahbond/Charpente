@@ -11,26 +11,38 @@ let
   /**
     Pick the right elements from a module
   */
-  prepareModule =
+  prepareModuleArray =
     host: module:
-    if (builtins.has module.targets host.name) then
-      (
-        module.sharedConfiguration
-        // (if utils.isDarwin host then module.darwinConfiguration else module.nixosConfiguration)
-      )
+    let
+      hasDarwinModule = (builtins.hasAttr "darwinConfiguration" module) && utils.isDarwin host;
+      hasNixosModule = (builtins.hasAttr "nixosConfiguration" module) && utils.isNixos host;
+
+    in
+    if (lib.lists.any (t: t == host.name) module.targets) then
+      [
+        (if (builtins.hasAttr "sharedConfiguration" module) then module.sharedConfiguration else _: { })
+
+        (if hasDarwinModule then module.darwinConfiguration else _: { })
+
+        (if hasNixosModule then module.nixosConfiguration else _: { })
+      ]
     else
-      { };
+      [ ];
 
   /**
     Gather hosts and modules into a single system's configuration
   */
-  prepareModules = host: modules: builtins.map (prepareModule host) modules;
+  prepareModules = host: modules: lib.lists.flatten (builtins.map (prepareModuleArray host) modules);
 
   /**
     Gather hosts and loaded modules into a single system's configuration
   */
   prepareSystem =
     { host, modules }:
+    let
+      preparedModules = prepareModules host modules;
+
+    in
     {
       name =
         assert lib.assertMsg (builtins.hasAttr "name" host)
@@ -38,7 +50,7 @@ let
         host.name;
 
       value = inputs.nix-darwin.lib.darwinSystem {
-        modules = prepareModules host modules;
+        modules = builtins.trace (builtins.elemAt preparedModules 3) preparedModules;
       };
     };
 
