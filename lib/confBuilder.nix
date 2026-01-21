@@ -51,7 +51,10 @@ let
         host.name;
 
       value = inputs.nix-darwin.lib.darwinSystem {
-        modules = preparedModules ++ [(_:{  nixpkgs.hostPlatform = lib.mkDefault host.platform;})];
+        modules = preparedModules ++ [
+          (_: { nixpkgs.hostPlatform = lib.mkDefault host.platform; })
+          host.configuration
+        ];
         specialArgs = extraArgs;
       };
     };
