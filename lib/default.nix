@@ -5,6 +5,7 @@
       root,
       hosts ? [ ],
       modules ? [ ],
+      extraArgs ? [ ],
 
     }:
     let
@@ -24,6 +25,7 @@
           modules
           lib
           inputs
+          extraArgs
           ;
       };
     in

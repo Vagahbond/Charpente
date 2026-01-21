@@ -5,6 +5,7 @@
   hosts,
   modules,
   utils,
+  extraArgs,
 }:
 let
 
@@ -50,7 +51,8 @@ let
         host.name;
 
       value = inputs.nix-darwin.lib.darwinSystem {
-        modules = builtins.trace (builtins.elemAt preparedModules 3) preparedModules;
+        modules = preparedModules ++ [(_:{  nixpkgs.hostPlatform = lib.mkDefault host.platform;})];
+        specialArgs = extraArgs;
       };
     };
 
