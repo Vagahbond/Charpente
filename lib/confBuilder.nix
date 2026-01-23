@@ -60,13 +60,30 @@ let
     };
 
   /**
+    Import a single module
+  */
+  importModule =
+    name: value:
+    if (value == { }) then
+      callerLib.importFilesFromCallerFlake "modules" [ name ]
+    else
+      callerLib.importFilesFromCallerFlake "modules/${name}" value;
+
+  /**
+    Import modules arborescencce
+  */
+  importModules = lib.lists.flatten (
+    lib.attrsets.attrValues (lib.attrsets.mapAttrs importModule modules)
+  );
+
+  /**
       Create the final attrset for all configurations
   */
   joinHostsAndModules =
     filter:
     let
       iHosts = callerLib.importFilesFromCallerFlake "hosts" hosts;
-      iModules = callerLib.importFilesFromCallerFlake "modules" modules;
+      iModules = importModules;
     in
     builtins.map (h: {
       modules = iModules;

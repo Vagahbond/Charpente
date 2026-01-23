@@ -27,7 +27,7 @@ let
       in
       assert lib.assertMsg (
         file != null
-      ) "You need to create either `${path}/${h}.nix` or file in `${path}/${h}/default.nix` dir !";
+      ) "You need to create either `${path}/${h}.nix` or `${path}/${h}/default.nix` !";
       import file
     ) names;
 
