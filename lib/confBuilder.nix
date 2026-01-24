@@ -41,6 +41,7 @@ let
   */
   prepareSystem =
     { host, modules }:
+    fn:
     let
       preparedModules = prepareModules host modules;
 
@@ -51,7 +52,7 @@ let
           "You need to specify a name (corresponds to hostname) in your host's config!";
         host.name;
 
-      value = inputs.nix-darwin.lib.darwinSystem {
+      value = fn {
         modules =
           preparedModules
           ++ [
@@ -99,6 +100,7 @@ let
   */
   mkDarwinSystems = builtins.listToAttrs (
     builtins.map prepareSystem (joinHostsAndModules utils.getDarwinSystems)
+      inputs.nix-darwin.lib.darwinSystem
   );
 
   /**
@@ -106,6 +108,7 @@ let
   */
   mkNixosSystems = builtins.listToAttrs (
     builtins.map prepareSystem (joinHostsAndModules utils.getNixosSystems)
+      inputs.nixpkgs.lib.nixosSystem
   );
 
 in
