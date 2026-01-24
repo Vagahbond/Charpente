@@ -6,6 +6,7 @@
   modules,
   utils,
   extraArgs,
+  globalModules,
 }:
 let
 
@@ -51,10 +52,13 @@ let
         host.name;
 
       value = inputs.nix-darwin.lib.darwinSystem {
-        modules = preparedModules ++ [
-          (_: { nixpkgs.hostPlatform = lib.mkDefault host.platform; })
-          host.configuration
-        ];
+        modules =
+          preparedModules
+          ++ [
+            (_: { nixpkgs.hostPlatform = lib.mkDefault host.platform; })
+            host.configuration
+          ]
+          ++ globalModules;
         specialArgs = extraArgs;
       };
     };
@@ -96,7 +100,20 @@ let
   mkDarwinSystems = builtins.listToAttrs (
     builtins.map prepareSystem (joinHostsAndModules utils.getDarwinSystems)
   );
+
+  /**
+    Build nixos systems
+  */
+  mkNixosSystems = builtins.listToAttrs (
+    builtins.map prepareSystem (joinHostsAndModules utils.getNixosSystems)
+  );
+
 in
 {
-  inherit mkDarwinSystems joinHostsAndModules prepareSystem;
+  inherit
+    mkDarwinSystems
+    mkNixosSystems
+    joinHostsAndModules
+    prepareSystem
+    ;
 }

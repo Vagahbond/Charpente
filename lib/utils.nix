@@ -19,7 +19,17 @@ let
     In a list of imported hosts, filter out all non-darwin systems
   */
   getDarwinSystems = hosts: (builtins.filter isDarwin hosts);
+
+  /**
+    In a list of imported hosts, filter out all non-nixos systems
+  */
+  getNixosSystems = hosts: (builtins.filter isNixos hosts);
 in
 {
-  inherit isDarwin isNixos getDarwinSystems;
+  inherit
+    isDarwin
+    isNixos
+    getDarwinSystems
+    getNixosSystems
+    ;
 }

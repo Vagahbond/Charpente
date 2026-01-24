@@ -6,6 +6,7 @@
       hosts ? [ ],
       modules ? [ ],
       extraArgs ? [ ],
+      globalModules ? [ ],
 
     }:
     let
@@ -26,11 +27,12 @@
           lib
           inputs
           extraArgs
+          globalModules
           ;
       };
     in
     {
-      nixosSystems = { };
+      nixosSystems = confBuilder.mkNixosSystems;
       darwinSystems = confBuilder.mkDarwinSystems;
     };
 }
