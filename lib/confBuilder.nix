@@ -40,8 +40,8 @@ let
     Gather hosts and loaded modules into a single system's configuration
   */
   prepareSystem =
-    { host, modules }:
     fn:
+    { host, modules }:
     let
       preparedModules = prepareModules host modules;
 
@@ -99,16 +99,19 @@ let
     Build darwin systems
   */
   mkDarwinSystems = builtins.listToAttrs (
-    builtins.map prepareSystem (joinHostsAndModules utils.getDarwinSystems)
-      inputs.nix-darwin.lib.darwinSystem
+    builtins.map (prepareSystem inputs.nix-darwin.lib.darwinSystem) (
+      joinHostsAndModules utils.getDarwinSystems
+    )
   );
 
   /**
     Build nixos systems
   */
   mkNixosSystems = builtins.listToAttrs (
-    builtins.map prepareSystem (joinHostsAndModules utils.getNixosSystems)
-      inputs.nixpkgs.lib.nixosSystem
+    builtins.map (prepareSystem inputs.nixpkgs.lib.nixosSystem) (
+      joinHostsAndModules utils.getNixosSystems
+    )
+
   );
 
 in
