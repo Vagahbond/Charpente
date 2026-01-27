@@ -1,8 +1,8 @@
 # 🏗️ Charpente
 
-## 📖 [Documentation](https://github.com/Vagahbond/Charpente/wiki)
+📖 [Documentation](https://github.com/Vagahbond/Charpente/wiki)
 
-## ❄️ [Example of usage](https://github.com/vagahbond/nix-config)
+❄️ [Example of usage](https://github.com/vagahbond/nix-config)
 
 Charpente holds your config together so you can spend more time nixing and less time debugging imports !
 
