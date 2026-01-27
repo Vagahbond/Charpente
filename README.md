@@ -9,7 +9,7 @@ A minimal and flexible layer of structure for your nix configuration :
 * Declare your modules in separates parts for Darwin, Nixos, or for both of them.
 * Never declare the same piece of config twice.
 * Injectable for increased flexibility
-* Per-host confoguration for an easy and smooth integration of hardware-configuration.nix
+* Per-host configuration for an easy and smooth integration of hardware-configuration.nix
 
 Using nix is a love-letter to the idea of not doing the same thing twice... ever. 
 
