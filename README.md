@@ -1,5 +1,9 @@
 # 🏗️ Charpente
 
+## 📖 [Documentation](https://github.com/Vagahbond/Charpente/wiki)
+
+## ❄️ [Example of usage](https://github.com/vagahbond/nix-config)
+
 Charpente holds your config together so you can spend more time nixing and less time debugging imports !
 
 A minimal and flexible layer of structure for your nix configuration : 
@@ -18,5 +22,3 @@ With this in mind, it is hard to justify having the same piece of configuration 
 With Charpente, never write the same piece of config twice, and keep your modules in a standardized, pleasant way, while still being able to do your experimentations here and there.
 Charpente will do all the heavy linking and you will spend more time writing your configuration than debugging your infinite recursions and broken nix imports.
 
-📖 [Documentation](https://github.com/Vagahbond/Charpente/wiki)
-❄️ [Example of usage](https://github.com/vagahbond/nix-config)
