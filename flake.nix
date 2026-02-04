@@ -35,6 +35,7 @@
           buildInputs = with pkgs; [
             cargo
             rustc
+            rustfmt
           ];
         };
       });
@@ -49,6 +50,7 @@
           buildInputs = with pkgs; [
             cargo
             rustc
+            rustfmt
           ];
         };
       });
