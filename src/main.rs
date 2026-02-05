@@ -1,9 +1,10 @@
-use bubbletea_rs::{Error, Program, quit};
+use bubbletea_rs::{Error, Program};
 
 mod cli;
 
 pub use cli::help::*;
-pub use cli::init::*;
+
+use crate::cli::{charpente_cli::CharpenteModel, init::InitStep};
 
 #[tokio::main]
 async fn main() {
@@ -14,24 +15,20 @@ async fn main() {
         return;
     }
 
-    let mut program: Result<Program<InitModel>, Error> = Err(Error::ProgramPanic(String::from(
+    let mut program: Result<Program<_>, Error> = Err(Error::ProgramPanic(String::from(
         "Something happened while initializing the program.",
     )));
 
     match args[1].as_str() {
         "init" => {
-            program = Program::<InitModel>::builder().alt_screen(false).build();
+            program = Program::<CharpenteModel<InitStep>>::builder()
+                .alt_screen(false)
+                .build();
         }
 
-        "modules" => {
-            program = Program::<InitModel>::builder().build();
-        }
-        "hosts" => {
-            program = Program::<InitModel>::builder().build();
-        }
-        "help" | _ => {
-            program = Program::<InitModel>::builder().build();
-        }
+        "modules" => {}
+        "hosts" => {}
+        "help" | _ => {}
     }
 
     if let Ok(cmd) = program {
