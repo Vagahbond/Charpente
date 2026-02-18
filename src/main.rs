@@ -1,6 +1,7 @@
 use bubbletea_rs::{Error, Program};
 
 mod cli;
+mod lib;
 
 pub use cli::help::*;
 

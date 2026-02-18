@@ -1,177 +1,126 @@
-use std::collections::HashMap;
-
-use bubbletea_rs::{Cmd, KeyMsg, Model, Msg, command, quit, tick};
-use bubbletea_widgets::{TextInput, textinput};
-use crossterm::event::{KeyCode, KeyModifiers};
-
 use crate::cli::{
-    charpente_cli::{CharpenteCliStep, CharpenteInterface, CharpenteModel},
+    charpente_cli::{CharpenteCliStep, CharpenteInterface, prepare_input},
     const_str,
 };
 
+use crate::lib::fs::create_modules;
+
 pub struct InitStep {}
+
+const MODULES_DIR_INDEX: usize = 2;
+const HOSTS_DIR_INDEX: usize = 3;
+const HOSTNAME_INDEX: usize = 4;
 
 impl CharpenteInterface for InitStep {
     fn get_steps() -> Vec<CharpenteCliStep> {
         vec![
             CharpenteCliStep {
                 input: None,
-                view: || "Welcome to charpente-cli!\n".to_string(),
-                update: || None,
+                view: |_| "Welcome to charpente-cli!\n\nPress 'enter' to continue.\n".to_string(),
+                update: |_, _| None,
             },
             CharpenteCliStep {
-                input: Some(textinput::new()),
-                view: || "Welcome to charpente-cli!\n".to_string(),
-                update: || None,
+                input: None,
+                view: |_| "Let's set Charpente up in your nix configuration.\n\n".to_string(),
+                update: |_, _| None,
+            },
+            CharpenteCliStep {
+                input: Some(prepare_input("Modules directory: ", "default: './modules'")),
+                view: |_| "Use a custom modules directory?\n".to_string(),
+                update: |_, _| None,
+            },
+            CharpenteCliStep {
+                input: Some(prepare_input("Hosts directory: ", "default: './hosts'")),
+                view: |_| "Use a custom hosts directory?\n".to_string(),
+                update: |_, _| None,
+            },
+            CharpenteCliStep {
+                input: Some(prepare_input("Hostname: ", "default: 'potatoe'")),
+                view: |_| "What hostname do you want to use?\n".to_string(),
+                update: |_, _| None,
+            },
+            CharpenteCliStep {
+                input: None,
+                view: |_| "Scaffolding modules directory...\n".to_string(),
+                update: |steps, _| {
+                    let modules_dir_name = if steps[MODULES_DIR_INDEX]
+                        .input
+                        .as_ref()
+                        .unwrap()
+                        .value()
+                        .is_empty()
+                    {
+                        None
+                    } else {
+                        Some(
+                            steps[MODULES_DIR_INDEX]
+                                .input
+                                .as_ref()
+                                .unwrap()
+                                .value()
+                                .clone(),
+                        )
+                    };
+
+                    if let Err(e) = create_modules(modules_dir_name.as_deref()) {
+                        panic!("Failed to create modules directory: {}", e);
+                    }
+                    None
+                },
+            },
+            CharpenteCliStep {
+                input: None,
+                view: |_| "Scaffolding hosts directory...\n".to_string(),
+                update: |_, _| None,
+            },
+            CharpenteCliStep {
+                input: None,
+                view: |_| {
+                    format!(
+                        "Add this to your flake inputs!\n\n{}\n\n",
+                        const_str::init::FLAKE_INPUT
+                    )
+                },
+                update: |_, _| None,
+            },
+            CharpenteCliStep {
+                input: None,
+                view: |s| {
+                    let modules_override = if s[MODULES_DIR_INDEX]
+                        .input
+                        .as_ref()
+                        .unwrap()
+                        .value()
+                        .is_empty()
+                    {
+                        None
+                    } else {
+                        Some(s[MODULES_DIR_INDEX].input.as_ref().unwrap().value().clone())
+                    };
+
+                    let hosts_override = if s[HOSTS_DIR_INDEX]
+                        .input
+                        .as_ref()
+                        .unwrap()
+                        .value()
+                        .is_empty()
+                    {
+                        None
+                    } else {
+                        Some(s[HOSTS_DIR_INDEX].input.as_ref().unwrap().value().clone())
+                    };
+
+                    format!(
+                        "Adding the following content to your flake outputs!\n\n{}\n\n",
+                        const_str::init::flake_output(
+                            modules_override,
+                            hosts_override,
+                            s[HOSTNAME_INDEX].input.as_ref().unwrap().value()
+                        )
+                    )
+                },
+                update: |_, _| None,
             },
         ]
     }
 }
-/*
-impl Model for Carousel {
-    fn init() -> (Self, Option<Cmd>) {
-        let mut modules_dir_name = textinput::new();
-        let mut hosts_dir_name = textinput::new();
-
-        modules_dir_name.prompt = "Use a custom modules directory? ".to_string();
-        hosts_dir_name.prompt = "Use a custom hosts directory? ".to_string();
-
-        modules_dir_name.placeholder = "default: './modules'".to_string();
-        hosts_dir_name.placeholder = "default: './hosts'".to_string();
-
-        (
-            Self {
-                current_step: InitStep::Intro,
-                modules_dir_name,
-                hosts_dir_name,
-            },
-            Some(command::printf("".to_string())),
-        )
-    }
-
-    fn update(&mut self, msg: Msg) -> Option<Cmd> {
-
-                KeyCode::Enter => match self.current_step {
-                    InitStep::Intro => {
-                        self.current_step = InitStep::ModulesDir;
-                    }
-
-                    InitStep::ModulesDir => {
-                        self.current_step = InitStep::HostsDir;
-                        self.modules_dir_name.blur();
-                        return Some(self.hosts_dir_name.focus());
-                    }
-
-                    InitStep::HostsDir => {
-                        self.current_step = InitStep::Hostname;
-                        self.hosts_dir_name.blur();
-                        return None;
-                    }
-
-                    InitStep::Hostname => {
-                        self.current_step = InitStep::ScaffoldingHosts;
-                        return None;
-                    }
-
-                    InitStep::ScaffoldingModules => {
-                        self.current_step = InitStep::ScaffoldingHosts;
-                        return None;
-                    }
-
-                    InitStep::ScaffoldingHosts => {
-                        self.current_step = InitStep::FlakeInput;
-                        return None;
-                    }
-
-                    InitStep::FlakeInput => {
-                        self.current_step = InitStep::FlakeOutput;
-                        return None;
-                    }
-
-                    InitStep::FlakeOutput => {
-                        self.current_step = InitStep::Done;
-                        return None;
-                    }
-
-                    InitStep::Done => {
-                        return Some(quit());
-                    }
-                },
-
-                _ => {
-                    if self.modules_dir_name.focused() {
-                        return self.modules_dir_name.update(msg);
-                    }
-                    if self.hosts_dir_name.focused() {
-                        return self.hosts_dir_name.update(msg);
-                    }
-                }
-            }
-        }
-        None
-    }
-
-    fn view(&self) -> String {
-        let mut res = String::from("Welcome to charpente-cli!\n");
-
-        res.push_str("Let's set Charpente up in your nix configuration.\n\n");
-
-        res.push_str("Press 'q' or 'ctrl+c' to quit.\n");
-        res.push_str("Press 'enter' to continue.\n");
-
-        if self.current_step == InitStep::ModulesDir {
-            res.push_str(self.modules_dir_name.view().as_str());
-            res.push_str("\n");
-        }
-
-        if self.current_step == InitStep::HostsDir {
-            res.push_str(self.hosts_dir_name.view().as_str());
-            res.push_str("\n");
-        }
-
-        if self.current_step == InitStep::ScaffoldingModules {
-            res.push_str(
-                format!(
-                    "Creating {} with a paceholder module...\n",
-                    self.modules_dir_name.value(),
-                )
-                .as_str(),
-            );
-        }
-
-        if self.current_step == InitStep::ScaffoldingHosts {
-            res.push_str(
-                format!(
-                    "Creating {} with a paceholder host...\n",
-                    self.hosts_dir_name.value(),
-                )
-                .as_str(),
-            );
-        }
-
-        if self.current_step == InitStep::FlakeInput {
-            let modules_override = if self.modules_dir_name.value().is_empty() {
-                None
-            } else {
-                Some(self.modules_dir_name.value().clone())
-            };
-
-            let hosts_override = if self.hosts_dir_name.value().is_empty() {
-                None
-            } else {
-                Some(self.hosts_dir_name.value().clone())
-            };
-
-            res.push_str(
-                format!(
-                    "Add the following content to your flake inputs!:\n\n{}\n\n",
-                    const_str::init::flake_output(modules_override, hosts_override, hostname)
-                )
-                .as_str(),
-            );
-        }
-
-        return res;
-    }
-}
- */
