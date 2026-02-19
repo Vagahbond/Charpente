@@ -1,6 +1,9 @@
-use crate::cli::{
-    charpente_cli::{CharpenteCliStep, CharpenteInterface, prepare_input},
-    const_str,
+use crate::{
+    cli::{
+        charpente_cli::{CharpenteCliStep, CharpenteInterface, prepare_input},
+        const_str,
+    },
+    lib::fs::{create_charpente_modules, create_hosts},
 };
 
 use crate::lib::fs::create_modules;
@@ -43,41 +46,67 @@ impl CharpenteInterface for InitStep {
                 input: None,
                 view: |_| "Scaffolding modules directory...\n".to_string(),
                 update: |steps, _| {
-                    let modules_dir_name = if steps[MODULES_DIR_INDEX]
-                        .input
-                        .as_ref()
-                        .unwrap()
-                        .value()
-                        .is_empty()
-                    {
-                        None
-                    } else {
-                        Some(
-                            steps[MODULES_DIR_INDEX]
-                                .input
-                                .as_ref()
-                                .unwrap()
-                                .value()
-                                .clone(),
-                        )
-                    };
+                    let modules_dir_name = steps[MODULES_DIR_INDEX].input.as_ref();
 
-                    if let Err(e) = create_modules(modules_dir_name.as_deref()) {
-                        panic!("Failed to create modules directory: {}", e);
+                    if modules_dir_name.is_none()
+                        || modules_dir_name.as_ref().unwrap().value().is_empty()
+                    {
+                        if let Err(e) = create_modules(None) {
+                            panic!("Failed to create modules directory: {}", e);
+                        }
+                    } else {
+                        if let Err(e) =
+                            create_modules(Some(modules_dir_name.unwrap().value().as_str()))
+                        {
+                            panic!("Failed to create modules directory: {}", e);
+                        }
                     }
+
                     None
                 },
             },
             CharpenteCliStep {
                 input: None,
                 view: |_| "Scaffolding hosts directory...\n".to_string(),
-                update: |_, _| None,
+                update: |steps, _| {
+                    let hosts_dir_name = steps[HOSTS_DIR_INDEX].input.as_ref().unwrap().value();
+                    let hostname = steps[HOSTNAME_INDEX].input.as_ref().unwrap().value();
+
+                    let _host_dir_name = if hosts_dir_name.is_empty() {
+                        None
+                    } else {
+                        Some(hosts_dir_name.as_str())
+                    };
+
+                    let _hostname = if hostname.is_empty() {
+                        None
+                    } else {
+                        Some(hostname.as_str())
+                    };
+
+                    if let Err(e) = create_hosts(_host_dir_name, _hostname) {
+                        panic!("Failed to create hosts directory: {}", e);
+                    }
+
+                    None
+                },
+            },
+            CharpenteCliStep {
+                input: None,
+                view: |_| "Creating charpenteModules.nix...\n".to_string(),
+                update: |_, _| {
+                    if let Err(e) = create_charpente_modules(None) {
+                        panic!("Failed to create charpenteModules.nix: {}", e);
+                    }
+
+                    None
+                },
             },
             CharpenteCliStep {
                 input: None,
                 view: |_| {
                     format!(
-                        "Add this to your flake inputs!\n\n{}\n\n",
+                        "Add this to your flake inputs!\nOnly keep follow statements that are relevant to your config.\n\n{}\n\n",
                         const_str::init::FLAKE_INPUT
                     )
                 },
@@ -111,7 +140,7 @@ impl CharpenteInterface for InitStep {
                     };
 
                     format!(
-                        "Adding the following content to your flake outputs!\n\n{}\n\n",
+                        "Adding the following content to your flake outputs!\nRemove the configurations you do not need!\n\n{}\n\n",
                         const_str::init::flake_output(
                             modules_override,
                             hosts_override,

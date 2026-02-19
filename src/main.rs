@@ -2,10 +2,24 @@ use bubbletea_rs::{Error, Program};
 
 mod cli;
 mod lib;
-
-pub use cli::help::*;
+mod templates;
 
 use crate::cli::{charpente_cli::CharpenteModel, init::InitStep};
+
+fn print_help() {
+    println!("Usage: charpente <command>");
+    println!("Commands:");
+    println!("  init            -> Initialize Charpente in your nix config");
+    println!("  modules <arg>   -> Manage modules");
+    println!("          list    -> List all modules");
+    println!("          add     -> Add a module");
+    println!("          remove  -> Remove a module");
+    println!("  hosts <arg>     -> Manage hosts");
+    println!("        list      -> List all hosts");
+    println!("        add       -> Add a host");
+    println!("        remove    -> Remove a host");
+    println!("  help            -> Print this help message");
+}
 
 #[tokio::main]
 async fn main() {
@@ -29,7 +43,9 @@ async fn main() {
 
         "modules" => {}
         "hosts" => {}
-        "help" | _ => {}
+        "help" | _ => {
+            print_help();
+        }
     }
 
     if let Ok(cmd) = program {

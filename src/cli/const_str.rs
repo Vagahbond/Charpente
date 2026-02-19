@@ -41,12 +41,12 @@ pub mod init {
 "#,
             hostname,
             if modules_override.is_some() {
-                format!("modulesDir = {};", modules_override.unwrap())
+                format!("modulesDir = \"{}\";", modules_override.unwrap())
             } else {
                 "".to_string()
             },
             if host_override.is_some() {
-                format!("hostDir = {};", host_override.unwrap())
+                format!("hostDir = \"{}\";", host_override.unwrap())
             } else {
                 "".to_string()
             }
