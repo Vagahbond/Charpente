@@ -1,10 +1,10 @@
-use bubbletea_rs::{Error, Program};
+use bubbletea_rs::Program;
 
 mod cli;
 mod lib;
 mod templates;
 
-use crate::cli::{charpente_cli::CharpenteModel, init::InitStep};
+use crate::cli::{charpente_cli::CharpenteModel, init::InitStep, modules::ListModulesStep};
 
 fn print_help() {
     println!("Usage: charpente <command>");
@@ -30,25 +30,36 @@ async fn main() {
         return;
     }
 
-    let mut program: Result<Program<_>, Error> = Err(Error::ProgramPanic(String::from(
-        "Something happened while initializing the program.",
-    )));
-
     match args[1].as_str() {
         "init" => {
-            program = Program::<CharpenteModel<InitStep>>::builder()
+            let program = Program::<CharpenteModel<InitStep>>::builder()
                 .alt_screen(false)
                 .build();
+
+            if let Ok(cmd) = program {
+                cmd.run().await;
+            }
         }
 
-        "modules" => {}
+        "modules" => match args[2].as_str() {
+            "list" => {
+                let program = Program::<CharpenteModel<ListModulesStep>>::builder()
+                    .alt_screen(false)
+                    .build();
+
+                if let Ok(cmd) = program {
+                    cmd.run().await;
+                }
+            }
+            "add" => {}
+            "remove" => {}
+            _ => {
+                print_help();
+            }
+        },
         "hosts" => {}
         "help" | _ => {
             print_help();
         }
-    }
-
-    if let Ok(cmd) = program {
-        cmd.run().await;
     }
 }

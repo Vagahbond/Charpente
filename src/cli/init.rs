@@ -3,10 +3,11 @@ use crate::{
         charpente_cli::{CharpenteCliStep, CharpenteInterface, prepare_input},
         const_str,
     },
-    lib::fs::{create_charpente_modules, create_hosts},
+    lib::{
+        hosts::create_hosts,
+        modules::{create_charpente_modules, create_modules},
+    },
 };
-
-use crate::lib::fs::create_modules;
 
 pub struct InitStep {}
 
