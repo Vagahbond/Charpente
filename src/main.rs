@@ -2,16 +2,20 @@ use bubbletea_rs::Program;
 
 mod cli;
 mod lib;
+
 mod templates;
 
-use crate::cli::{charpente_cli::CharpenteModel, init::InitStep, modules::ListModulesStep};
+use crate::cli::{
+    charpente_cli::{CharpenteCliModel, CharpenteCliPage},
+    modules::generate::GenModulesPage,
+};
 
 fn print_help() {
     println!("Usage: charpente <command>");
     println!("Commands:");
     println!("  init            -> Initialize Charpente in your nix config");
     println!("  modules <arg>   -> Manage modules");
-    println!("          list    -> List all modules");
+    println!("          gen     -> Generate the module list");
     println!("          add     -> Add a module");
     println!("          remove  -> Remove a module");
     println!("  hosts <arg>     -> Manage hosts");
@@ -32,18 +36,20 @@ async fn main() {
 
     match args[1].as_str() {
         "init" => {
-            let program = Program::<CharpenteModel<InitStep>>::builder()
-                .alt_screen(false)
-                .build();
+            /*
+              let program = Program::<CharpenteModel<InitStep>>::builder()
+                    .alt_screen(false)
+                    .build();
 
-            if let Ok(cmd) = program {
-                cmd.run().await;
-            }
+                if let Ok(cmd) = program {
+                    cmd.run().await;
+                }
+            */
         }
 
         "modules" => match args[2].as_str() {
-            "list" => {
-                let program = Program::<CharpenteModel<ListModulesStep>>::builder()
+            "gen" => {
+                let program = Program::<CharpenteCliModel<GenModulesPage>>::builder()
                     .alt_screen(false)
                     .build();
 

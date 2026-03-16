@@ -1,11 +1,11 @@
-use crate::{
+/* use crate::{
     cli::{
         charpente_cli::{CharpenteCliStep, CharpenteInterface, prepare_input},
         const_str,
     },
     lib::{
         hosts::create_hosts,
-        modules::{create_charpente_modules, create_modules},
+        modules::{create_module, generate_modules_list},
     },
 };
 
@@ -52,12 +52,12 @@ impl CharpenteInterface for InitStep {
                     if modules_dir_name.is_none()
                         || modules_dir_name.as_ref().unwrap().value().is_empty()
                     {
-                        if let Err(e) = create_modules(None) {
+                        if let Err(e) = create_module(None) {
                             panic!("Failed to create modules directory: {}", e);
                         }
                     } else {
                         if let Err(e) =
-                            create_modules(Some(modules_dir_name.unwrap().value().as_str()))
+                            create_module(Some(modules_dir_name.unwrap().value().as_str()))
                         {
                             panic!("Failed to create modules directory: {}", e);
                         }
@@ -96,7 +96,7 @@ impl CharpenteInterface for InitStep {
                 input: None,
                 view: |_| "Creating charpenteModules.nix...\n".to_string(),
                 update: |_, _| {
-                    if let Err(e) = create_charpente_modules(None) {
+                    if let Err(e) = generate_modules_list(None) {
                         panic!("Failed to create charpenteModules.nix: {}", e);
                     }
 
@@ -154,3 +154,4 @@ impl CharpenteInterface for InitStep {
         ]
     }
 }
+*/
